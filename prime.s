@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 607   clock cycles
-		;		N = 4421   : 2029  clock cycles
-		;		N = 122011 : 11838 clock cycles
+		;		N = 499    : 605   clock cycles
+		;		N = 4421   : 2027  clock cycles
+		;		N = 122011 : 11836 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -14,11 +14,9 @@ out		DCD		0          ; The output
 		LDR		R0, [R5]   ; N := *candidate
 		
 		
-		;		Special case: N <=3
+		;		Special case: N <=2
 		CMP		R0, #2
 		BLT		notprime
-		BEQ		prime
-		CMP		R0, #3
 		BEQ		prime
 		
 		
@@ -29,14 +27,14 @@ out		DCD		0          ; The output
 		BEQ		notprime   ;    goto notprime
 		
 		
-		;		Special case: N == 5, 7
-		;		Because these two are used as the
-		;		starting factors later, they must
-		;		be excluded to prevent being treated
+		;		Special case: N == 3, 5, 7
+		;		Because these numbers are used as the
+		;		starting factors, they must checked
+		;		specifically to prevent being treated
 		;		as composites when they self-divide
-		CMP		R0, #5
-		BEQ		prime
-		CMP		R0, #7
+		CMP		R0, #3
+		CMPNE	R0, #5
+		CMPNE	R0, #7
 		BEQ		prime
 		
 		
