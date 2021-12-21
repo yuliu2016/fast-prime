@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 610   clock cycles
-		;		N = 4421   : 2040  clock cycles
-		;		N = 122011 : 11896 clock cycles
+		;		N = 499    : 607   clock cycles
+		;		N = 4421   : 2029  clock cycles
+		;		N = 122011 : 11838 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -147,8 +147,7 @@ modulo	AND		R5, R4, #1 ; temp := m & 1
 		BNE		modulo     ;    goto modulo
 		
 		CMP		R3, #0     ; if (R == 0)
-		BEQ		notprime   ;    goto notprime
-		CMP		R8, #0     ; if (R2 == 0)
+		CMPNE	R8, #0     ; if (R2 == 0)
 		BEQ		notprime   ;    goto notprime
 		
 		;		Check if upper bound has been reached
