@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 541   clock cycles
-		;		N = 4421   : 1977  clock cycles
-		;		N = 122011 : 10800 clock cycles
+		;		N = 499    : 533   clock cycles
+		;		N = 4421   : 1933  clock cycles
+		;		N = 122011 : 11742 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -38,6 +38,21 @@ out		DCD		0          ; The output
 		BEQ		prime
 		
 		
+		;		Special case: N % 3 == 0
+		MOV		R1, R0	 ; x    := N
+		
+triswap	MOV		R3, #0     ; S    := 0
+trisum	AND		R5, R1, #3 ; temp := x & 3
+		ADD		R3, R3, R5 ; S    := S + temp
+		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
+		BNE		trisum     ;    goto trisum
+		MOV		R1, R3     ; x    := S
+		CMP		R1, #3     ; if (x > 3)
+		BGT		triswap    ;    goto triswap
+		;		|          ; if (x == 3)
+		BEQ		notprime   ;    goto notprime
+		
+		
 		;		Calculate  M, equals to N with all
 		;		significant digits reversed. This
 		;		reduces the instructions needed for
@@ -53,21 +68,6 @@ reverse	AND		R5, R1, #1 ; temp := n & 1
 		ADD		R6, R6, #1 ; G    := G + 1
 		LSRS		R1, R1, #1 ; if (n:=n>>1 != 0)
 		BNE		reverse    ;    goto reverse
-		
-		
-		;		Special case: N % 3 == 0
-		MOV		R1, R0	 ; x    := N
-		
-triswap	MOV		R2, #0     ; S    := 0
-trisum	AND		R5, R1, #3 ; temp := x & 3
-		ADD		R2, R2, R5 ; S    := S + temp
-		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
-		BNE		trisum     ;    goto trisum
-		MOV		R1, R2     ; x    := S
-		CMP		R1, #3     ; if (x > 3)
-		BGT		triswap    ;    goto triswap
-		;		|          ; if (x == 3)
-		BEQ		notprime   ;    goto notprime
 		
 		
 		;		Find sqrt(N), the upper bound for
