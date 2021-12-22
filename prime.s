@@ -21,8 +21,8 @@ out		DCD		0          ; The output
 		
 		
 		;		Special case: N % 2 == 0
-		;		Allows all future factors that are
-		;		multiples of 2 to be eliminated
+		;		Check whether the last bit is set.
+		;		This eliminates all even factors.
 		ANDS		R5, R0, #1 ; if (N & 1 == 0)
 		BEQ		notprime   ;    goto notprime
 		
@@ -47,7 +47,7 @@ out		DCD		0          ; The output
 		;		effect as base-4. The code continuously
 		;		replaces x with the sum of its digits
 		;		in base-4 until x is less than 3. Then,
-		;		if x *is* 3, N cannot be prime.
+		;		if x *is* equal to 3, N cannot be prime.
 		MOV		R1, R0	 ; x    := N
 		
 triswap	MOV		R3, #0     ; S    := 0
@@ -87,8 +87,8 @@ reverse	AND		R5, R1, #1 ; temp := n & 1
 		;		Given a 32 bit int X, it finds int Q
 		;		such that Q^2 <= X < (Q+1)^2.
 		;
-		;		Originally E is calculated in a loop,
-		;		but it can actually be determined from
+		;		Originally E was calculated in a loop,
+		;		but here it can directly be found from
 		;		G, so this loop is eliminated. E must
 		;		be even so the last bit is masked off.
 		MOV		R1, #0     ; Q    := 0
@@ -100,7 +100,7 @@ reverse	AND		R5, R1, #1 ; temp := n & 1
 		
 		
 		CMP		R3, #0     ; if (E == 0)
-sqrt		BEQ		sqrtfi     ;    goto sqrtfi
+sqrt		BEQ		preload    ;    goto preload
 		ADD		R5, R1, R3 ; temp := Q + E
 		CMP		R4, R5     ; if (X >= temp)
 		SUBGE	R4, R4, R5 ;    X := X - temp
@@ -110,9 +110,27 @@ sqrt		BEQ		sqrtfi     ;    goto sqrtfi
 		B		sqrt       ; goto sqrt
 		
 		
-		;		Put Q into U as the upper bound
-		;		and intialize (5,7) sequence pair
-sqrtfi	MOV		R6, R1     ; U    := Q
+		;		Swap Q into U as the upper bound
+preload	MOV		R6, R1     ; U    := Q
+
+		;		Get ready to compute modulo by first
+		;		initializing a pair of factors (5,7)
+		;		to be calculated simultaneously.
+		;
+		;		From this point on, it is known that
+		;		N % 2 != 0 and N % 3 != 0. This means
+		;		that for every group of 6 consecutive
+		;		numbers starting from 5, only two of
+		;		them can possibly be a factor of N.
+		;		The other 4 checked cases are:
+		;		|   5 + 6k + 1 -> Multiple of 2
+		;		|   5 + 6k + 3 -> Multiple of 2
+		;		|   5 + 6k + 4 -> Multiple of 3
+		;		|   5 + 6k + 5 -> Multiple of 2
+		;		This means that only theses cases need
+		;		to be checked for testing primality:
+		;		|   5 + 6k
+		;		|   5 + 6k + 2
 		MOV		R1, #5     ; D1   := 5
 		MOV		R7, #7     ; D2   := 7
 		
@@ -123,19 +141,7 @@ sqrtfi	MOV		R6, R1     ; U    := Q
 		;		1 (binary) digit, then subtract the
 		;		divisor if less than the ramainder.
 		;		Repeat for all binary digits up to M.
-		;
-		;		If R is 0 for any chosen factor D,
-		;		then the candidate is not prime
-		;
-		;		Precondition: N%2!=0 and N%3!=0. This
-		;		means that for every group of 6
-		;		consecutive numbers, there are 4 that
-		;		cannot possibly be factors that can be
-		;		skipped. This is the 6k+i optimization;
-		;		Only 5+6k and 5+2+6k need to be checked.
-		;		Here, they are checked in a simutaneous
-		;		loop (which allows register sharing)
-checfact	MOV		R3, #0     ; R1   := 0
+reset	MOV		R3, #0     ; R1   := 0
 		MOV		R8, #0     ; R2   := 0
 		MOV		R4, R2     ; m    := M
 		
@@ -158,11 +164,14 @@ modulo	AND		R5, R4, #1 ; temp := m & 1
 		CMPNE	R8, #0     ; if (R2 == 0)
 		BEQ		notprime   ;    goto notprime
 		
-		;		Check if upper bound has been reached
+		;		Increment the test factors, and if
+		;		they are under the upper bound, reset
+		;		the modulo registers and restart.
+		;		Otherwise N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
 		CMP		R1, R6     ; if (D <= U)
 		ADDLE	R7, R7, #6 ;    D2 := D2 + 6
-		BLE		checfact   ;    goto checfact
+		BLE		reset   ;    goto reset
 		
 		
 		;		Finally, store the results
