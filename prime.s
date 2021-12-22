@@ -1,4 +1,4 @@
-candidate	DCD		122011     ; The input prime candidate
+candidate	DCD		390043     ; The input prime candidate
 out		DCD		0          ; The output
 		
 		;		Fast Prime Checker
@@ -7,6 +7,7 @@ out		DCD		0          ; The output
 		;		N = 499    : 426   clock cycles
 		;		N = 4421   : 1351  clock cycles
 		;		N = 122011 : 7156  clock cycles
+		;		N = 390043 : 13978 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -197,7 +198,7 @@ modulo
 		;		the modulo registers and restart.
 		;		Otherwise N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
-		CMP		R1, R9     ; if (D > U)
+		CMP		R1, R9     ; if (D1 > U)
 		BGT		prime      ;    goto prime
 		ADD		R7, R7, #6 ; D2   := D2 + 6
 		
