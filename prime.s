@@ -50,11 +50,14 @@ out		DCD		0          ; The output
 		;		if x *is* equal to 3, N cannot be prime.
 		MOV		R1, R0	 ; x    := N
 		
-triswap	MOV		R3, #0     ; S    := 0
-trisum	AND		R5, R1, #3 ; temp := x & 3
+triswap
+		MOV		R3, #0     ; S    := 0
+trisum	
+		AND		R5, R1, #3 ; temp := x & 3
 		ADD		R3, R3, R5 ; S    := S + temp
 		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
 		BNE		trisum     ;    goto trisum
+		
 		MOV		R1, R3     ; x    := S
 		CMP		R1, #3     ; if (x > 3)
 		BGT		triswap    ;    goto triswap
@@ -71,7 +74,8 @@ trisum	AND		R5, R1, #3 ; temp := x & 3
 		MOV		R2, #0     ; M    := 0
 		MOV		R1, R0     ; n    := N
 		MOV		R6, #0     ; G    := 0
-reverse	AND		R5, R1, #1 ; temp := n & 1
+reverse	
+		AND		R5, R1, #1 ; temp := n & 1
 		;		|            M    := temp | (M << 1)
 		ORR		R2, R5, R2, LSL #1
 		ADD		R6, R6, #1 ; G    := G + 1
@@ -100,7 +104,8 @@ reverse	AND		R5, R1, #1 ; temp := n & 1
 		
 		
 		CMP		R3, #0     ; if (E == 0)
-sqrt		BEQ		preload    ;    goto preload
+sqrt		
+		BEQ		preload    ;    goto preload
 		ADD		R5, R1, R3 ; temp := Q + E
 		CMP		R4, R5     ; if (X >= temp)
 		SUBGE	R4, R4, R5 ;    X := X - temp
@@ -118,11 +123,12 @@ sqrt		BEQ		preload    ;    goto preload
 		;		| R9 holds U, the upper bound
 		;
 		;		Swap Q into U as the upper bound
-preload	MOV		R9, R1     ; U    := Q
+preload	
+		MOV		R9, R1     ; U    := Q
 		
 		;		Get ready to compute modulo by first
 		;		initializing a pair of factors (5,7)
-		;		to be calculated simultaneously.
+		;		to be checked simultaneously.
 		;
 		;		From this point on, it is known that
 		;		N % 2 != 0 and N % 3 != 0. This means
@@ -140,7 +146,7 @@ preload	MOV		R9, R1     ; U    := Q
 		;		|   5 + 6k + 2
 		MOV		R1, #5     ; D1   := 5
 		MOV		R7, #7     ; D2   := 7
-		
+
 		
 		;		Use long division to efficiently
 		;		calculate modulo R := N % D
@@ -148,12 +154,14 @@ preload	MOV		R9, R1     ; U    := Q
 		;		1 (binary) digit, then subtract the
 		;		divisor if less than the ramainder.
 		;		Repeat for all binary digits up to M.
-reset	MOV		R3, #1     ; R1   := 1
+reset	
+		MOV		R3, #1     ; R1   := 1
 		MOV		R8, #1     ; R2   := 1
 		LSR		R4, R2, #1 ; m    := M >> 1
 		
 		
-modulo	AND		R5, R4, #1 ; temp := m & 1
+modulo
+		AND		R5, R4, #1 ; temp := m & 1
 		
 		;		|            R1   := temp | (R1 << 1)
 		ORR		R3, R5, R3, LSL #1
@@ -183,13 +191,15 @@ modulo	AND		R5, R4, #1 ; temp := m & 1
 		
 		
 		;		Finally, store the results
-prime	MOV		R0, #1
+prime	
+		MOV		R0, #1
 		ADR		R5, out
 		STR		R0, [R5]   ; *out := 1
 		END
 		
 		
-notprime	MOV		R0, #0
+notprime	
+		MOV		R0, #0
 		ADR		R5, out
 		STR		R0, [R5]   ; *out := 0
 		END
