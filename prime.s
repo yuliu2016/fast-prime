@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 605   clock cycles
-		;		N = 4421   : 2027  clock cycles
-		;		N = 122011 : 11836 clock cycles
+		;		N = 499    : 546   clock cycles
+		;		N = 4421   : 1984  clock cycles
+		;		N = 122011 : 10809 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -43,13 +43,16 @@ out		DCD		0          ; The output
 		;		reduces the instructions needed for
 		;		retrieving bits, and also acts as
 		;		a counter (the last bit is always 1)
+		;		G is the numerical count of bits
 		MOV		R2, #0     ; M    := 0
 		MOV		R1, R0     ; n    := N
+		MOV		R6, #0     ; G    := 0
 reverse	AND		R5, R1, #1 ; temp := n & 1
 		;		M    := temp | (M << 1)
 		ORR		R2, R5, R2, LSL #1
+		ADD		R6, R6, #1 ; G    := G + 1
 		LSRS		R1, R1, #1 ; if (n:=n>>1 != 0)
-		BNE		reverse      ;    goto reverse
+		BNE		reverse    ;    goto reverse
 		
 		
 		;		Special case: N % 3 == 0
@@ -76,18 +79,18 @@ mod3		AND		R5, R4, #1 ; temp := m & 1
 		;		developed by Martin W. Guy (1985).
 		;		Given a 32 bit int X, it finds int Q
 		;		such that Q^2 <= X < (Q+1)^2.
-		;		The algorithm is attached in the same
-		;		folder as this file as sqrt.c
+		;
+		;		Originally E is calculated in a loop,
+		;		but it can actually be determined from
+		;		G, so this loop is eliminated. E must
+		;		be even so the last bit is masked off.
 		MOV		R1, #0     ; Q    := 0
-		MOV		R3, #1     ; E    := 1 << 30
-		LSL		R3, R3, #30
+		MOV		R3, #1     ; E    := 1
+		;		|            temp := G & ~1
+		AND		R5, R6, #0xFFFFFFFE
+		LSL		R3, R3, R5 ; E    := E << temp
 		MOV		R4, R0     ; X    := N
 		
-rshift	CMP		R3, R4     ; if (E <= X)
-		BLE		sqrt       ;    goto sqrt
-		
-		LSR		R3, R3, #2 ; E    := E >> 2
-		B		rshift     ; goto rshift
 		
 sqrt		CMP		R3, #0     ; if (E == 0)
 		BEQ		sqrtfi     ;    goto sqrtfi
