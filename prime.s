@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 446   clock cycles
-		;		N = 4421   : 1606  clock cycles
-		;		N = 122011 : 10005 clock cycles
+		;		N = 499    : 426   clock cycles
+		;		N = 4421   : 1351  clock cycles
+		;		N = 122011 : 7156  clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -150,8 +150,10 @@ preload
 		
 		;		Set to preload first 3 bits of N
 		MOV		R10, #3     ; J    := 3
+		MOV		R11, #8     ; K    := 8
 		SUB		R5, R6, #3  ; temp := G - 3
-		LSR		R11, R0, R5 ; L    := N >> temp
+		LSR		R12, R0, R5 ; L    := N >> temp
+		
 		
 		
 		;		Use long division to efficiently
@@ -162,8 +164,8 @@ preload
 		;		Repeat for all binary digits up to M.
 reset
 		LSR		R4, R2, R10 ; m    := M >> J
-		MOV		R3, R11     ; R1   := L
-		MOV		R8, R11     ; R2   := L
+		MOV		R3, R12     ; R1   := L
+		MOV		R8, R12     ; R2   := L
 		
 		
 modulo
@@ -196,9 +198,19 @@ modulo
 		;		Otherwise N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
 		CMP		R1, R9     ; if (D > U)
-		BGT		prime
+		BGT		prime      ;    goto prime
+		ADD		R7, R7, #6 ; D2   := D2 + 6
 		
-		ADD		R7, R7, #6 ;    D2 := D2 + 6
+		ANDS		R5, R1, R11 ; if(D1 & K == 0)
+		BEQ		reset       ;   goto reset
+		
+		;		D1 is now occupying one more bit, so
+		;		every preloaded value is incremented
+		ADD		R10, R10, #1 ; J    := J + 1
+		LSL		R11, R11, #1 ; K    := K << 1
+		SUB		R5, R6, R10  ; temp := G - J
+		LSR		R12, R0, R5  ; L    := N >> temp
+		
 		B		reset   ;    goto reset
 		
 		
