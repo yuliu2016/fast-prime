@@ -110,8 +110,15 @@ sqrt		BEQ		preload    ;    goto preload
 		B		sqrt       ; goto sqrt
 		
 		
+		;		Prepare data for the main loop
+		;
+		;		Registers that should not change:
+		;		| R2 holds M, the reverse of N
+		;		| R6 holds G, the # of digits in N
+		;		| R9 holds U, the upper bound
+		;
 		;		Swap Q into U as the upper bound
-preload	MOV		R6, R1     ; U    := Q
+preload	MOV		R9, R1     ; U    := Q
 		
 		;		Get ready to compute modulo by first
 		;		initializing a pair of factors (5,7)
@@ -170,19 +177,19 @@ modulo	AND		R5, R4, #1 ; temp := m & 1
 		;		the modulo registers and restart.
 		;		Otherwise N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
-		CMP		R1, R6     ; if (D <= U)
+		CMP		R1, R9     ; if (D <= U)
 		ADDLE	R7, R7, #6 ;    D2 := D2 + 6
 		BLE		reset   ;    goto reset
 		
 		
 		;		Finally, store the results
-prime	MOV		R2, #1
+prime	MOV		R0, #1
 		ADR		R5, out
-		STR		R2, [R5]   ; *out := 1
+		STR		R0, [R5]   ; *out := 1
 		END
 		
 		
-notprime	MOV		R2, #0
+notprime	MOV		R0, #0
 		ADR		R5, out
-		STR		R2, [R5]   ; *out := 0
+		STR		R0, [R5]   ; *out := 0
 		END
