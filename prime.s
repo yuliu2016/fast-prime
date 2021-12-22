@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 506   clock cycles
-		;		N = 4421   : 1834  clock cycles
-		;		N = 122011 : 11220 clock cycles
+		;		N = 499    : 442   clock cycles
+		;		N = 4421   : 1594  clock cycles
+		;		N = 122011 : 9946  clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -148,6 +148,11 @@ preload
 		MOV		R7, #7     ; D2   := 7
 		
 		
+		;		Find the first 3 bits of N to preload
+		SUB		R5, R6, #3 ; temp := G - 3
+		;		|            L    := N >> temp
+		LSR		R10, R0, R5
+		
 		;		Use long division to efficiently
 		;		calculate modulo R := N % D
 		;		i.e. shift remainder 1 left, bring down
@@ -155,9 +160,9 @@ preload
 		;		divisor if less than the ramainder.
 		;		Repeat for all binary digits up to M.
 reset
-		MOV		R3, #1     ; R1   := 1
-		MOV		R8, #1     ; R2   := 1
-		LSR		R4, R2, #1 ; m    := M >> 1
+		MOV		R3, R10    ; R1   := L
+		MOV		R8, R10    ; R2   := L
+		LSR		R4, R2, #3 ; m    := M >> 3
 		
 		
 modulo
