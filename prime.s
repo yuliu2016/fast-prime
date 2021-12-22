@@ -39,6 +39,15 @@ out		DCD		0          ; The output
 		
 		
 		;		Special case: N % 3 == 0
+		;
+		;		Use the fact that in base-4, if the
+		;		sum of all digits is a multiple of 3,
+		;		then the number is also a multiple of 3.
+		;		In binary, shifting by 2 has the same
+		;		effect as base-4. The code continuously
+		;		replaces x with the sum of its digits
+		;		in base-4 until x is less than 3. Then,
+		;		if x *is* 3, N cannot be prime.
 		MOV		R1, R0	 ; x    := N
 		
 triswap	MOV		R3, #0     ; S    := 0
@@ -63,7 +72,7 @@ trisum	AND		R5, R1, #3 ; temp := x & 3
 		MOV		R1, R0     ; n    := N
 		MOV		R6, #0     ; G    := 0
 reverse	AND		R5, R1, #1 ; temp := n & 1
-		;		M    := temp | (M << 1)
+		;		|            M    := temp | (M << 1)
 		ORR		R2, R5, R2, LSL #1
 		ADD		R6, R6, #1 ; G    := G + 1
 		LSRS		R1, R1, #1 ; if (n:=n>>1 != 0)
@@ -104,7 +113,7 @@ sqrt		BEQ		sqrtfi     ;    goto sqrtfi
 		;		Put Q into U as the upper bound
 		;		and intialize (5,7) sequence pair
 sqrtfi	MOV		R6, R1     ; U    := Q
-		MOV		R1, #5     ; D    := 5
+		MOV		R1, #5     ; D1   := 5
 		MOV		R7, #7     ; D2   := 7
 		
 		
@@ -126,31 +135,31 @@ sqrtfi	MOV		R6, R1     ; U    := Q
 		;		Only 5+6k and 5+2+6k need to be checked.
 		;		Here, they are checked in a simutaneous
 		;		loop (which allows register sharing)
-checfact	MOV		R3, #0     ; R    := 0
+checfact	MOV		R3, #0     ; R1   := 0
 		MOV		R8, #0     ; R2   := 0
 		MOV		R4, R2     ; m    := M
 		
 modulo	AND		R5, R4, #1 ; temp := m & 1
 		
-		;		R    := temp | (R << 1)
+		;		|            R1   := temp | (R1 << 1)
 		ORR		R3, R5, R3, LSL #1
-		CMP		R3, R1     ; if (R > D)
-		SUBGE	R3, R3, R1 ;    R := R - D
+		CMP		R3, R1     ; if (R1 > D1)
+		SUBGE	R3, R3, R1 ;   R1 := R1 - D1
 		
-		;		R2   := temp | (R2 << 1)
+		;		|            R2   := temp | (R2 << 1)
 		ORR		R8, R5, R8, LSL #1
 		CMP		R8, R7     ; if (R2 > D2)
-		SUBGE	R8, R8, R7 ;   R2 := R2 - D2
+		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
 		
 		LSRS		R4, R4, #1 ; if ((m:=m>>1) != 0)
 		BNE		modulo     ;    goto modulo
 		
-		CMP		R3, #0     ; if (R == 0)
+		CMP		R3, #0     ; if (R1 == 0)
 		CMPNE	R8, #0     ; if (R2 == 0)
 		BEQ		notprime   ;    goto notprime
 		
 		;		Check if upper bound has been reached
-		ADD		R1, R1, #6 ; D := D + 6
+		ADD		R1, R1, #6 ; D1   := D1 + 6
 		CMP		R1, R6     ; if (D <= U)
 		ADDLE	R7, R7, #6 ;    D2 := D2 + 6
 		BLE		checfact   ;    goto checfact
