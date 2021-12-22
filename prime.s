@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 500   clock cycles
-		;		N = 4421   : 1812  clock cycles
-		;		N = 122011 : 11104 clock cycles
+		;		N = 499    : 506   clock cycles
+		;		N = 4421   : 1834  clock cycles
+		;		N = 122011 : 11220 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -52,7 +52,7 @@ out		DCD		0          ; The output
 		
 triswap
 		MOV		R3, #0     ; S    := 0
-trisum	
+trisum
 		AND		R5, R1, #3 ; temp := x & 3
 		ADD		R3, R3, R5 ; S    := S + temp
 		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
@@ -74,7 +74,7 @@ trisum
 		MOV		R2, #0     ; M    := 0
 		MOV		R1, R0     ; n    := N
 		MOV		R6, #0     ; G    := 0
-reverse	
+reverse
 		AND		R5, R1, #1 ; temp := n & 1
 		;		|            M    := temp | (M << 1)
 		ORR		R2, R5, R2, LSL #1
@@ -104,7 +104,7 @@ reverse
 		
 		
 		CMP		R3, #0     ; if (E == 0)
-sqrt		
+sqrt
 		BEQ		preload    ;    goto preload
 		ADD		R5, R1, R3 ; temp := Q + E
 		CMP		R4, R5     ; if (X >= temp)
@@ -123,7 +123,7 @@ sqrt
 		;		| R9 holds U, the upper bound
 		;
 		;		Swap Q into U as the upper bound
-preload	
+preload
 		MOV		R9, R1     ; U    := Q
 		
 		;		Get ready to compute modulo by first
@@ -146,7 +146,7 @@ preload
 		;		|   5 + 6k + 2
 		MOV		R1, #5     ; D1   := 5
 		MOV		R7, #7     ; D2   := 7
-
+		
 		
 		;		Use long division to efficiently
 		;		calculate modulo R := N % D
@@ -154,30 +154,34 @@ preload
 		;		1 (binary) digit, then subtract the
 		;		divisor if less than the ramainder.
 		;		Repeat for all binary digits up to M.
-reset	
+reset
 		MOV		R3, #1     ; R1   := 1
 		MOV		R8, #1     ; R2   := 1
 		LSR		R4, R2, #1 ; m    := M >> 1
 		
 		
 modulo
+		CMP		R3, R1     ; if (R1 > D1)
+		SUBGE	R3, R3, R1 ;   R1 := R1 - D1
+		CMP		R8, R7     ; if (R2 > D2)
+		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
+		
+		
 		AND		R5, R4, #1 ; temp := m & 1
 		
 		;		|            R1   := temp | (R1 << 1)
 		ORR		R3, R5, R3, LSL #1
-		CMP		R3, R1     ; if (R1 > D1)
-		SUBGE	R3, R3, R1 ;   R1 := R1 - D1
-		
 		;		|            R2   := temp | (R2 << 1)
 		ORR		R8, R5, R8, LSL #1
-		CMP		R8, R7     ; if (R2 > D2)
-		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
+		
 		
 		LSRS		R4, R4, #1 ; if ((m:=m>>1) != 0)
 		BNE		modulo     ;    goto modulo
 		
 		CMP		R3, #0     ; if (R1 == 0)
+		CMPNE	R3, R1     ; if (R1 == D1)
 		CMPNE	R8, #0     ; if (R2 == 0)
+		CMPNE	R8, R7     ; if (R1 == D2)
 		BEQ		notprime   ;    goto notprime
 		
 		;		Increment the test factors, and if
@@ -190,15 +194,14 @@ modulo
 		BLE		reset   ;    goto reset
 		
 		
-		;		Finally, store the results
-prime	
+prime
 		MOV		R0, #1
 		ADR		R5, out
 		STR		R0, [R5]   ; *out := 1
 		END
 		
 		
-notprime	
+notprime
 		MOV		R0, #0
 		ADR		R5, out
 		STR		R0, [R5]   ; *out := 0
