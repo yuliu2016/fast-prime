@@ -71,6 +71,29 @@ mod3		AND		R5, R4, #1 ; temp := m & 1
 		CMP		R3, #0     ; if (R == 0)
 		BEQ		notprime   ;    goto notprime
 		
+		;		Special case: N % 3 == 0
+		;		Use the fact that if the sum of the
+		;		digits in two bit chunks of n is
+		;		divisible by 3, then n % 3 == 0
+		;		MOV		R1, R0	 ; n    := N
+		;sum3	CMP		R1, #3     ; if (n <= 3)
+		;		BLT		comp3      ;    goto comp3
+		;		BEQ		notprime   ; -------------
+		;		MOV		R2, #0     ; S    := 0
+		;
+		;extrt3	CMP		R1, #0     ; if (n == 0)
+		;		BEQ		swap3      ;    goto swap3
+		;		AND		R5, R1, #3 ; temp := n & 3
+		;		ADD		R2, R2, R5 ; S    := S + temp
+		;		LSR		R1, R1, #2 ; n    := n >> 2
+		;		B		extrt3     ; goto extrt3
+		;
+		;swap3	MOV		R1, R2     ; n    := S
+		;		B		sum3       ; goto sum3
+		;
+		;comp3	CMP		R1, #0     ; if (n == 0)
+		;		BEQ		notprime   ;    goto notprime
+		
 		
 		;		Find sqrt(N), the upper bound for
 		;		any potential factors
