@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 546   clock cycles
-		;		N = 4421   : 1984  clock cycles
-		;		N = 122011 : 10809 clock cycles
+		;		N = 499    : 541   clock cycles
+		;		N = 4421   : 1977  clock cycles
+		;		N = 122011 : 10800 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -92,14 +92,14 @@ mod3		AND		R5, R4, #1 ; temp := m & 1
 		MOV		R4, R0     ; X    := N
 		
 		
-sqrt		CMP		R3, #0     ; if (E == 0)
-		BEQ		sqrtfi     ;    goto sqrtfi
+		CMP		R3, #0     ; if (E == 0)
+sqrt		BEQ		sqrtfi     ;    goto sqrtfi
 		ADD		R5, R1, R3 ; temp := Q + E
 		CMP		R4, R5     ; if (X >= temp)
 		SUBGE	R4, R4, R5 ;    X := X - temp
 		ADDGE	R1, R5, R3 ;    Q := temp + E
 		LSR		R1, R1, #1 ; Q    := Q >> 1
-		LSR		R3, R3, #2 ; E    := E >> 2
+		LSRS		R3, R3, #2 ; E    := E >> 2
 		B		sqrt       ; goto sqrt
 		
 		
