@@ -4,9 +4,9 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 533   clock cycles
-		;		N = 4421   : 1933  clock cycles
-		;		N = 122011 : 11742 clock cycles
+		;		N = 499    : 500   clock cycles
+		;		N = 4421   : 1812  clock cycles
+		;		N = 122011 : 11104 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -112,7 +112,7 @@ sqrt		BEQ		preload    ;    goto preload
 		
 		;		Swap Q into U as the upper bound
 preload	MOV		R6, R1     ; U    := Q
-
+		
 		;		Get ready to compute modulo by first
 		;		initializing a pair of factors (5,7)
 		;		to be calculated simultaneously.
@@ -141,9 +141,10 @@ preload	MOV		R6, R1     ; U    := Q
 		;		1 (binary) digit, then subtract the
 		;		divisor if less than the ramainder.
 		;		Repeat for all binary digits up to M.
-reset	MOV		R3, #0     ; R1   := 0
-		MOV		R8, #0     ; R2   := 0
-		MOV		R4, R2     ; m    := M
+reset	MOV		R3, #1     ; R1   := 1
+		MOV		R8, #1     ; R2   := 1
+		LSR		R4, R2, #1 ; m    := M >> 1
+		
 		
 modulo	AND		R5, R4, #1 ; temp := m & 1
 		
