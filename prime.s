@@ -56,43 +56,18 @@ reverse	AND		R5, R1, #1 ; temp := n & 1
 		
 		
 		;		Special case: N % 3 == 0
-		;		Use long division and M
-		MOV		R3, #0     ; R    := 0
-		MOV		R4, R2     ; m    := M
-mod3		AND		R5, R4, #1 ; temp := m & 1
+		MOV		R1, R0	 ; x    := N
 		
-		;		R    := temp | (R << 1)
-		ORR		R3, R5, R3, LSL #1
-		CMP		R3, #3     ; if (R > 3)
-		SUBGE	R3, R3, #3 ;    R := R - 3
-		LSRS		R4, R4, #1 ; if ((m:=m>>1) != 0)
-		BNE		mod3       ;    goto mod3
-		
-		CMP		R3, #0     ; if (R == 0)
+triswap	MOV		R2, #0     ; S    := 0
+trisum	AND		R5, R1, #3 ; temp := x & 3
+		ADD		R2, R2, R5 ; S    := S + temp
+		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
+		BNE		trisum     ;    goto trisum
+		MOV		R1, R2     ; x    := S
+		CMP		R1, #3     ; if (x > 3)
+		BGT		triswap    ;    goto triswap
+		;		|          ; if (x == 3)
 		BEQ		notprime   ;    goto notprime
-		
-		;		Special case: N % 3 == 0
-		;		Use the fact that if the sum of the
-		;		digits in two bit chunks of n is
-		;		divisible by 3, then n % 3 == 0
-		;		MOV		R1, R0	 ; n    := N
-		;sum3	CMP		R1, #3     ; if (n <= 3)
-		;		BLT		comp3      ;    goto comp3
-		;		BEQ		notprime   ; -------------
-		;		MOV		R2, #0     ; S    := 0
-		;
-		;extrt3	CMP		R1, #0     ; if (n == 0)
-		;		BEQ		swap3      ;    goto swap3
-		;		AND		R5, R1, #3 ; temp := n & 3
-		;		ADD		R2, R2, R5 ; S    := S + temp
-		;		LSR		R1, R1, #2 ; n    := n >> 2
-		;		B		extrt3     ; goto extrt3
-		;
-		;swap3	MOV		R1, R2     ; n    := S
-		;		B		sum3       ; goto sum3
-		;
-		;comp3	CMP		R1, #0     ; if (n == 0)
-		;		BEQ		notprime   ;    goto notprime
 		
 		
 		;		Find sqrt(N), the upper bound for
