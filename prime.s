@@ -149,7 +149,25 @@ preload
 		MOV		R7, #7     ; D2   := 7
 		
 		
-		;		Set to preload first 3 bits of N
+		;		Keep track of the number of "preload"
+		;		digits prior to entering the main
+		;		loop, allowing bits higher than
+		;		nbits(N)-nbits(D) to be set into
+		;		the remainder registers. Since 
+		;		R can never be greater than 2*D if R
+		;		and D have the same number of bits,
+		;		division still works while reducing
+		;		the execution time.
+		;
+		;		Since the lowest possible factor is 5,
+		;		there can be at *least* 3 bits loaded
+		;		into the remainer (initialized next).
+		;		These change when D increases.
+		;
+		;		| J is the number of loaded bits
+		;		| K is 1 << J, used for checking D
+		;		| L is G - J, where (N >> L) becomes
+		;		|    the first J bits of N shifted.
 		MOV		R10, #3     ; J    := 3
 		MOV		R11, #8     ; K    := 8
 		SUB		R5, R6, #3  ; temp := G - 3
@@ -218,12 +236,12 @@ modulo
 prime
 		MOV		R0, #1
 		ADR		R5, out
-		STR		R0, [R5]   ; *out := 1
+		STR		R0, [R5]
 		END
 		
 		
 notprime
 		MOV		R0, #0
 		ADR		R5, out
-		STR		R0, [R5]   ; *out := 0
+		STR		R0, [R5]
 		END
