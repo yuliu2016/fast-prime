@@ -12,7 +12,7 @@ out		DCD		0          ; The output
 		
 		
 		ADR		R5, candidate
-		LDR		R0, [R5]   ; N := *candidate
+		LDR		R0, [R5]
 		
 		
 		;		Special case: N <=2
@@ -49,7 +49,7 @@ out		DCD		0          ; The output
 		;		replaces x with the sum of its digits
 		;		in base-4 until x is less than 3. Then,
 		;		if x *is* equal to 3, N cannot be prime.
-		MOV		R1, R0	 ; x    := N
+		MOV		R1, R0     ; x    := N
 		
 triswap
 		MOV		R3, #0     ; S    := 0
@@ -165,7 +165,6 @@ preload
 		;		These change when D increases.
 		;
 		;		| J is the number of loaded bits
-		;		| K is 1 << J, used for checking D
 		;		| L is G - J, where (N >> L) becomes
 		;		|    the first J bits of N shifted.
 		MOV		R10, #3     ; J    := 3
@@ -193,7 +192,7 @@ reset
 		;		4. If R==0 or R==D, D is a factor
 modulo
 		CMP		R3, R1     ; if (R1 > D1)
-		SUBGE	R3, R3, R1 ;   R1 := R1 - D1
+		SUBGE	R3, R3, R1 ;    R1 := R1 - D1
 		CMP		R8, R7     ; if (R2 > D2)
 		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
 		
@@ -229,8 +228,8 @@ modulo
 		
 		;		Check whether a new bit can be preloaded
 		;		next. If so, increase J and decrease L
-		LSRS		R5, R1, R10 ; if (D1>>J != 0)
-		BEQ		reset       ;   goto reset
+		LSRS		R5, R1, R10  ; if (D1>>J == 0)
+		BEQ		reset        ;    goto reset
 		
 		ADD		R10, R10, #1 ; J    := J + 1
 		SUB		R12, R6, R10 ; L    := G - J
