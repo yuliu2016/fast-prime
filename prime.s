@@ -172,19 +172,26 @@ preload
 		MOV		R11, #8     ; K    := 8
 		SUB		R12, R6, #3 ; L    := G - 3
 		
-		
-		;		Use long division to efficiently
-		;		calculate modulo R := N % D
-		;		i.e. shift remainder 1 left, bring down
-		;		1 (binary) digit, then subtract the
-		;		divisor if less than the ramainder.
-		;		Repeat for all binary digits up to M.
+
+		;		Reset registers to check for the next
+		;		pair of potential factors 5 + 6k and
+		;		5 + 6k + 2, taking into account the
+		;		offsets J and L for preloading.
 reset
 		LSR		R4, R2, R10 ; m    := M >> J
 		LSR		R3, R0, R12 ; R1   := N >> L
 		MOV		R8, R3      ; R2   := R1
 		
 		
+		;		Apply long division to calculate 
+		;		remainders R1 and R2 against their
+		;		respective factors D1 and D2.
+		;		
+		;		Steps:
+		;		1. Subtract D from R if R > D.
+		;		2. Bring down next bit from m
+		;		3. If m has more bits, repeat
+		;		4. If R==0 or R==D, D is a factor
 modulo
 		CMP		R3, R1     ; if (R1 > D1)
 		SUBGE	R3, R3, R1 ;   R1 := R1 - D1
@@ -208,25 +215,27 @@ modulo
 		CMPNE	R8, #0     ; if (R2 == 0)
 		CMPNE	R8, R7     ; if (R1 == D2)
 		BEQ		notprime   ;    goto notprime
-		
-		;		Increment the test factors, and if
-		;		they are under the upper bound, reset
-		;		the modulo registers and restart.
-		;		Otherwise N must be prime.
+
+
+		;		Increment the pair of factors. If the
+		;		lower factor is greater than the upper
+		;		bound, then N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
 		CMP		R1, R9     ; if (D1 > U)
 		BGT		prime      ;    goto prime
+
+		;		Otherwise, continue checking with the
+		;		next pair of factors.
 		ADD		R7, R7, #6 ; D2   := D2 + 6
-		
+
+		;		Check whether a new bit can be preloaded.
+		;		If so, increase J, K and decrease L
 		ANDS		R5, R1, R11 ; if(D1 & K == 0)
 		BEQ		reset       ;   goto reset
 		
-		;		D1 is now occupying one more bit, so
-		;		every preloaded value is incremented
 		ADD		R10, R10, #1 ; J    := J + 1
 		LSL		R11, R11, #1 ; K    := K << 1
 		SUB		R12, R6, R10 ; L    := G - J
-		
 		B		reset   ;    goto reset
 		
 		
