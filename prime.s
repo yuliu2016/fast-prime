@@ -191,9 +191,9 @@ reset
 		;		3. If m has more bits, repeat
 		;		4. If R==0 or R==D, D is a factor
 modulo
-		CMP		R3, R1     ; if (R1 > D1)
+		CMP		R3, R1     ; if (R1 >= D1)
 		SUBGE	R3, R3, R1 ;    R1 := R1 - D1
-		CMP		R8, R7     ; if (R2 > D2)
+		CMP		R8, R7     ; if (R2 >= D2)
 		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
 		
 		
