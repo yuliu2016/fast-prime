@@ -4,10 +4,10 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 423   clock cycles
-		;		N = 4421   : 1346  clock cycles
-		;		N = 122011 : 7149  clock cycles
-		;		N = 390043 : 13970 clock cycles
+		;		N = 499    : 420   clock cycles
+		;		N = 4421   : 1341  clock cycles
+		;		N = 122011 : 7142  clock cycles
+		;		N = 390043 : 13962 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -84,7 +84,7 @@ reverse
 		BNE		reverse    ;    goto reverse
 		
 		
-		;		Find floor(sqrt(N)), the upper bound 
+		;		Find floor(sqrt(N)), the upper bound
 		;		for any potential factors of N
 		;
 		;		Use the square root abacus method
@@ -169,10 +169,9 @@ preload
 		;		| L is G - J, where (N >> L) becomes
 		;		|    the first J bits of N shifted.
 		MOV		R10, #3     ; J    := 3
-		MOV		R11, #8     ; K    := 8
 		SUB		R12, R6, #3 ; L    := G - 3
 		
-
+		
 		;		Reset registers to check for the next
 		;		pair of potential factors 5 + 6k and
 		;		5 + 6k + 2, taking into account the
@@ -183,10 +182,10 @@ reset
 		MOV		R8, R3      ; R2   := R1
 		
 		
-		;		Apply long division to calculate 
+		;		Apply long division to calculate
 		;		remainders R1 and R2 against their
 		;		respective factors D1 and D2.
-		;		
+		;
 		;		Steps:
 		;		1. Subtract D from R if R > D.
 		;		2. Bring down next bit from m
@@ -215,28 +214,27 @@ modulo
 		CMPNE	R8, #0     ; if (R2 == 0)
 		CMPNE	R8, R7     ; if (R1 == D2)
 		BEQ		notprime   ;    goto notprime
-
-
+		
+		
 		;		Increment the pair of factors. If the
 		;		lower factor is greater than the upper
 		;		bound, then N must be prime.
 		ADD		R1, R1, #6 ; D1   := D1 + 6
 		CMP		R1, R9     ; if (D1 > U)
 		BGT		prime      ;    goto prime
-
+		
 		;		Otherwise, continue checking with the
 		;		next pair of factors.
 		ADD		R7, R7, #6 ; D2   := D2 + 6
-
-		;		Check whether a new bit can be preloaded.
-		;		If so, increase J, K and decrease L
-		ANDS		R5, R1, R11 ; if(D1 & K == 0)
+		
+		;		Check whether a new bit can be preloaded
+		;		next. If so, increase J and decrease L
+		LSRS		R5, R1, R10 ; if (D1>>J != 0)
 		BEQ		reset       ;   goto reset
 		
 		ADD		R10, R10, #1 ; J    := J + 1
-		LSL		R11, R11, #1 ; K    := K << 1
 		SUB		R12, R6, R10 ; L    := G - J
-		B		reset   ;    goto reset
+		B		reset        ; goto reset
 		
 		
 prime
