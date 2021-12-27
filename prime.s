@@ -4,10 +4,10 @@ out		DCD		0          ; The output
 		;		Fast Prime Checker
 		;
 		;		Runtime benchmarks (in VisUAL assembler):
-		;		N = 499    : 426   clock cycles
-		;		N = 4421   : 1351  clock cycles
-		;		N = 122011 : 7156  clock cycles
-		;		N = 390043 : 13978 clock cycles
+		;		N = 499    : 423   clock cycles
+		;		N = 4421   : 1346  clock cycles
+		;		N = 122011 : 7149  clock cycles
+		;		N = 390043 : 13970 clock cycles
 		;		(All primes, all under 1000 iterations)
 		
 		
@@ -84,8 +84,8 @@ reverse
 		BNE		reverse    ;    goto reverse
 		
 		
-		;		Find sqrt(N), the upper bound for
-		;		any potential factors
+		;		Find floor(sqrt(N)), the upper bound 
+		;		for any potential factors of N
 		;
 		;		Use the square root abacus method
 		;		developed by Martin W. Guy (1985).
@@ -153,7 +153,7 @@ preload
 		;		digits prior to entering the main
 		;		loop, allowing bits higher than
 		;		nbits(N)-nbits(D) to be set into
-		;		the remainder registers. Since 
+		;		the remainder registers. Since
 		;		R can never be greater than 2*D if R
 		;		and D have the same number of bits,
 		;		division still works while reducing
@@ -170,9 +170,7 @@ preload
 		;		|    the first J bits of N shifted.
 		MOV		R10, #3     ; J    := 3
 		MOV		R11, #8     ; K    := 8
-		SUB		R5, R6, #3  ; temp := G - 3
-		LSR		R12, R0, R5 ; L    := N >> temp
-		
+		SUB		R12, R6, #3 ; L    := G - 3
 		
 		
 		;		Use long division to efficiently
@@ -183,8 +181,8 @@ preload
 		;		Repeat for all binary digits up to M.
 reset
 		LSR		R4, R2, R10 ; m    := M >> J
-		MOV		R3, R12     ; R1   := L
-		MOV		R8, R12     ; R2   := L
+		LSR		R3, R0, R12 ; R1   := N >> L
+		MOV		R8, R3      ; R2   := R1
 		
 		
 modulo
@@ -227,8 +225,7 @@ modulo
 		;		every preloaded value is incremented
 		ADD		R10, R10, #1 ; J    := J + 1
 		LSL		R11, R11, #1 ; K    := K << 1
-		SUB		R5, R6, R10  ; temp := G - J
-		LSR		R12, R0, R5  ; L    := N >> temp
+		SUB		R12, R6, R10 ; L    := G - J
 		
 		B		reset   ;    goto reset
 		
