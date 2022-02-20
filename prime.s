@@ -1,5 +1,5 @@
-candidate	DCD		390043     ; The input prime candidate
-out		DCD		0          ; The output
+candidate	dcd		390043     ; The input prime candidate
+out		dcd		0          ; The output
 		
 		;		Fast Prime Checker
 		;
@@ -11,21 +11,21 @@ out		DCD		0          ; The output
 		;		(All primes, all under 1000 iterations)
 		
 		
-		ADR		R5, candidate
-		LDR		R0, [R5]
+		adr		R5, candidate
+		ldr		R0, [R5]
 		
 		
 		;		Special case: N <=2
-		CMP		R0, #2
-		BLT		notprime
-		BEQ		prime
+		cmp		R0, #2
+		blt		notprime
+		beq		prime
 		
 		
 		;		Special case: N % 2 == 0
 		;		Check whether the last bit is set.
 		;		This eliminates all even factors.
-		ANDS		R5, R0, #1 ; if (N & 1 == 0)
-		BEQ		notprime   ;    goto notprime
+		ands		R5, R0, #1 ; if (N & 1 == 0)
+		beq		notprime   ;    goto notprime
 		
 		
 		;		Special case: N == 3, 5, 7
@@ -33,10 +33,10 @@ out		DCD		0          ; The output
 		;		starting factors, they must checked
 		;		specifically to prevent being treated
 		;		as composites when they self-divide
-		CMP		R0, #3
-		CMPNE	R0, #5
-		CMPNE	R0, #7
-		BEQ		prime
+		cmp		R0, #3
+		cmpne	R0, #5
+		cmpne	R0, #7
+		beq		prime
 		
 		
 		;		Special case: N % 3 == 0
@@ -49,21 +49,21 @@ out		DCD		0          ; The output
 		;		replaces x with the sum of its digits
 		;		in base-4 until x is less than 3. Then,
 		;		if x *is* equal to 3, N cannot be prime.
-		MOV		R1, R0     ; x    := N
+		mov		R1, R0     ; x    := N
 		
 triswap
-		MOV		R3, #0     ; S    := 0
+		mov		R3, #0     ; S    := 0
 trisum
-		AND		R5, R1, #3 ; temp := x & 3
-		ADD		R3, R3, R5 ; S    := S + temp
-		LSRS		R1, R1, #2 ; if (x:=x>>2 != 0)
-		BNE		trisum     ;    goto trisum
+		and		R5, R1, #3 ; temp := x & 3
+		add		R3, R3, R5 ; S    := S + temp
+		lsrs		R1, R1, #2 ; if (x:=x>>2 != 0)
+		bne		trisum     ;    goto trisum
 		
-		MOV		R1, R3     ; x    := S
-		CMP		R1, #3     ; if (x > 3)
-		BGT		triswap    ;    goto triswap
+		mov		R1, R3     ; x    := S
+		cmp		R1, #3     ; if (x > 3)
+		bgt		triswap    ;    goto triswap
 		;		|          ; if (x == 3)
-		BEQ		notprime   ;    goto notprime
+		beq		notprime   ;    goto notprime
 		
 		
 		;		Calculate  M, equals to N with all
@@ -72,16 +72,16 @@ trisum
 		;		retrieving bits, and also acts as
 		;		a counter (the last bit is always 1)
 		;		G is the numerical count of bits
-		MOV		R2, #0     ; M    := 0
-		MOV		R1, R0     ; n    := N
-		MOV		R6, #0     ; G    := 0
+		mov		R2, #0     ; M    := 0
+		mov		R1, R0     ; n    := N
+		mov		R6, #0     ; G    := 0
 reverse
-		AND		R5, R1, #1 ; temp := n & 1
+		and		R5, R1, #1 ; temp := n & 1
 		;		|            M    := temp | (M << 1)
-		ORR		R2, R5, R2, LSL #1
-		ADD		R6, R6, #1 ; G    := G + 1
-		LSRS		R1, R1, #1 ; if (n:=n>>1 != 0)
-		BNE		reverse    ;    goto reverse
+		orr		R2, R5, R2, LSL #1
+		add		R6, R6, #1 ; G    := G + 1
+		lsrs		R1, R1, #1 ; if (n:=n>>1 != 0)
+		bne		reverse    ;    goto reverse
 		
 		
 		;		Find floor(sqrt(N)), the upper bound
@@ -96,24 +96,24 @@ reverse
 		;		but here it can directly be found from
 		;		G, so this loop is eliminated. E must
 		;		be even so the last bit is masked off.
-		MOV		R1, #0     ; Q    := 0
-		MOV		R3, #1     ; E    := 1
+		mov		R1, #0     ; Q    := 0
+		mov		R3, #1     ; E    := 1
 		;		|            temp := G & ~1
-		AND		R5, R6, #0xFFFFFFFE
-		LSL		R3, R3, R5 ; E    := E << temp
-		MOV		R4, R0     ; X    := N
+		and		R5, R6, #0xFFFFFFFE
+		lsl		R3, R3, R5 ; E    := E << temp
+		mov		R4, R0     ; X    := N
 		
 		
-		CMP		R3, #0     ; if (E == 0)
+		cmp		R3, #0     ; if (E == 0)
 sqrt
-		BEQ		preload    ;    goto preload
-		ADD		R5, R1, R3 ; temp := Q + E
-		CMP		R4, R5     ; if (X >= temp)
-		SUBGE	R4, R4, R5 ;    X := X - temp
-		ADDGE	R1, R5, R3 ;    Q := temp + E
-		LSR		R1, R1, #1 ; Q    := Q >> 1
-		LSRS		R3, R3, #2 ; E    := E >> 2
-		B		sqrt       ; goto sqrt
+		beq		preload    ;    goto preload
+		add		R5, R1, R3 ; temp := Q + E
+		cmp		R4, R5     ; if (X >= temp)
+		subge	R4, R4, R5 ;    X := X - temp
+		addge	R1, R5, R3 ;    Q := temp + E
+		lsr		R1, R1, #1 ; Q    := Q >> 1
+		lsrs		R3, R3, #2 ; E    := E >> 2
+		b		sqrt       ; goto sqrt
 		
 		
 		;		Prepare data for the main loop
@@ -125,7 +125,7 @@ sqrt
 		;
 		;		Swap Q into U as the upper bound
 preload
-		MOV		R9, R1     ; U    := Q
+		mov		R9, R1     ; U    := Q
 		
 		;		Get ready to compute modulo by first
 		;		initializing a pair of factors (5,7)
@@ -145,8 +145,8 @@ preload
 		;		to be checked for testing primality:
 		;		|   5 + 6k
 		;		|   5 + 6k + 2
-		MOV		R1, #5     ; D1   := 5
-		MOV		R7, #7     ; D2   := 7
+		mov		R1, #5     ; D1   := 5
+		mov		R7, #7     ; D2   := 7
 		
 		
 		;		Keep track of the number of "preload"
@@ -167,8 +167,8 @@ preload
 		;		| J is the number of loaded bits
 		;		| L is G - J, where (N >> L) becomes
 		;		|    the first J bits of N shifted.
-		MOV		R10, #3     ; J    := 3
-		SUB		R12, R6, #3 ; L    := G - 3
+		mov		R10, #3     ; J    := 3
+		sub		R12, R6, #3 ; L    := G - 3
 		
 		
 		;		Reset registers to check for the next
@@ -176,9 +176,9 @@ preload
 		;		5 + 6k + 2, taking into account the
 		;		offsets J and L for preloading.
 reset
-		LSR		R4, R2, R10 ; m    := M >> J
-		LSR		R3, R0, R12 ; R1   := N >> L
-		MOV		R8, R3      ; R2   := R1
+		lsr		R4, R2, R10 ; m    := M >> J
+		lsr		R3, R0, R12 ; R1   := N >> L
+		mov		R8, R3      ; R2   := R1
 		
 		
 		;		Apply long division to calculate
@@ -191,60 +191,60 @@ reset
 		;		3. If m has more bits, repeat
 		;		4. If R==0 or R==D, D is a factor
 modulo
-		CMP		R3, R1     ; if (R1 >= D1)
-		SUBGE	R3, R3, R1 ;    R1 := R1 - D1
-		CMP		R8, R7     ; if (R2 >= D2)
-		SUBGE	R8, R8, R7 ;    R2 := R2 - D2
+		cmp		R3, R1     ; if (R1 >= D1)
+		subge	R3, R3, R1 ;    R1 := R1 - D1
+		cmp		R8, R7     ; if (R2 >= D2)
+		subge	R8, R8, R7 ;    R2 := R2 - D2
 		
 		
-		AND		R5, R4, #1 ; temp := m & 1
+		and		R5, R4, #1 ; temp := m & 1
 		
 		;		|            R1   := temp | (R1 << 1)
-		ORR		R3, R5, R3, LSL #1
+		orr		R3, R5, R3, LSL #1
 		;		|            R2   := temp | (R2 << 1)
-		ORR		R8, R5, R8, LSL #1
+		orr		R8, R5, R8, LSL #1
 		
 		
-		LSRS		R4, R4, #1 ; if ((m:=m>>1) != 0)
-		BNE		modulo     ;    goto modulo
+		lsrs		R4, R4, #1 ; if ((m:=m>>1) != 0)
+		bne		modulo     ;    goto modulo
 		
-		CMP		R3, #0     ; if (R1 == 0)
-		CMPNE	R3, R1     ; if (R1 == D1)
-		CMPNE	R8, #0     ; if (R2 == 0)
-		CMPNE	R8, R7     ; if (R1 == D2)
-		BEQ		notprime   ;    goto notprime
+		cmp		R3, #0     ; if (R1 == 0)
+		cmpne	R3, R1     ; if (R1 == D1)
+		cmpne	R8, #0     ; if (R2 == 0)
+		cmpne	R8, R7     ; if (R1 == D2)
+		beq		notprime   ;    goto notprime
 		
 		
 		;		Increment the pair of factors. If the
 		;		lower factor is greater than the upper
 		;		bound, then N must be prime.
-		ADD		R1, R1, #6 ; D1   := D1 + 6
-		CMP		R1, R9     ; if (D1 > U)
-		BGT		prime      ;    goto prime
+		add		R1, R1, #6 ; D1   := D1 + 6
+		cmp		R1, R9     ; if (D1 > U)
+		bgt		prime      ;    goto prime
 		
 		;		Otherwise, continue checking with the
 		;		next pair of factors.
-		ADD		R7, R7, #6 ; D2   := D2 + 6
+		add		R7, R7, #6 ; D2   := D2 + 6
 		
 		;		Check whether a new bit can be preloaded
 		;		next. If so, increase J and decrease L
-		LSRS		R5, R1, R10  ; if (D1>>J == 0)
-		BEQ		reset        ;    goto reset
+		lsrs		R5, R1, R10  ; if (D1>>J == 0)
+		beq		reset        ;    goto reset
 		
-		ADD		R10, R10, #1 ; J    := J + 1
-		SUB		R12, R6, R10 ; L    := G - J
-		B		reset        ; goto reset
+		add		R10, R10, #1 ; J    := J + 1
+		sub		R12, R6, R10 ; L    := G - J
+		b		reset        ; goto reset
 		
 		
 prime
-		MOV		R0, #1
-		ADR		R5, out
-		STR		R0, [R5]
-		END
+		mov		R0, #1
+		adr		R5, out
+		str		R0, [R5]
+		end
 		
 		
 notprime
-		MOV		R0, #0
-		ADR		R5, out
-		STR		R0, [R5]
-		END
+		mov		R0, #0
+		adr		R5, out
+		str		R0, [R5]
+		end
